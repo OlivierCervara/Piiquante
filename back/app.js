@@ -1,5 +1,6 @@
-require('dotenv').config
-const express = require('express'); // Importe le module Express pour créer une application web.
+const dotenv = require("dotenv");
+dotenv.config();
+const express = require("express"); // Importe le module Express pour créer une application web.
 const app = express(); // Crée une application Express.
 const cors = require("cors") // Importe le module cors pour permettre les requêtes CORS (Cross-Origin Resource Sharing) à travers le serveur.
 const port = 3000 // Définit le numéro de port pour le serveur.
