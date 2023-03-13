@@ -1,12 +1,21 @@
-const {User} = require("../mongo.js")
+const { User } = require("../mongo")
+const bcrypt = require("bcrypt")
 
-function createUser(req, res) {
+async function createUser(req, res) {
     const { email, password } = req.body
-    const user = new User({ email, password })
+
+    const hashedPassword = await hashPassword(password)
+
+    const user = new User({ email, password: hashedPassword })
 
     user.save()
         .then(() => res.send({ message: "Utilisateur enregistre !" }))
         .catch(err => console.log("User pas enregistre", err)) 
+}
+
+function hashPassword(password) {
+    const saltRounds = 10
+    return bcrypt.hash(password, saltRounds)
 }
 
 module.exports = {createUser}

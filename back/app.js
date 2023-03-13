@@ -5,10 +5,10 @@ const cors = require("cors") // Importe le module cors pour permettre les requê
 const port = 3000 // Définit le numéro de port pour le serveur.
 
 // Connection to database
-require("./mongo.js")
+require("./mongo")
 
 // Controllers
-const {createUser} = require("./controllers/user.js")
+const { createUser } = require("./controllers/user")
 
 // Middleware
 app.use(cors())
