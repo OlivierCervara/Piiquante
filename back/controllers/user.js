@@ -18,8 +18,11 @@ function hashPassword(password) {
     return bcrypt.hash(password, saltRounds)
 }
 
-function logUser(req, res) {
+async function logUser(req, res) {
     const { email, password } = req.body
+    const user = await User.findOne({email: email})
+
+    const isPasswordOK = bcrypt.compare(password, user.password)
 }
 
 module.exports = {createUser, logUser}
