@@ -1,4 +1,4 @@
-const { User } = require("../mongo")
+const {User} = require("../mongo")
 const bcrypt = require("bcrypt")
 
 async function createUser(req, res) {
@@ -9,8 +9,8 @@ async function createUser(req, res) {
     const user = new User({ email, password: hashedPassword })
 
     user.save()
-        .then(() => res.send({ message: "Utilisateur enregistre !" }))
-        .catch(err => console.log("User pas enregistre", err)) 
+        .then(() => res.status(201).send({ message: "Utilisateur enregistre !" }))
+        .catch((err) => res.status(409).send({ message: "Utilisateur pas enregistre" + err }))
 }
 
 function hashPassword(password) {
@@ -18,6 +18,8 @@ function hashPassword(password) {
     return bcrypt.hash(password, saltRounds)
 }
 
-function logUser(req, res) {}
+function logUser(req, res) {
+    const { email, password } = req.body
+}
 
 module.exports = {createUser, logUser}

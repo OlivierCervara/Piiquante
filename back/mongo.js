@@ -1,4 +1,5 @@
 const mongoose = require("mongoose"); // Le module mongoose est utilisé pour gérer les interactions avec la base de données. 
+const uniqueValidator = require('mongoose-unique-validator');
 const USER = process.env.USER_DB;
 const PASSWORD = process.env.PASSWORD_DB;
 const DATABASE = process.env.NAME_DATABASE;
@@ -9,9 +10,10 @@ mongoose.connect(uri)
         .catch(error => console.error({error}));
 // Définit un schéma de modèle utilisateur qui spécifie la structure de la collection d'utilisateurs dans la base de données.
 const userSchema = new mongoose.Schema({
-    email: String,
-    password: String
+    email: {type: String, required: true, unique: true },
+    password: {type: String, required: true}
 })
+userSchema.plugin(uniqueValidator)
 
 const User = mongoose.model("User", userSchema)
 
