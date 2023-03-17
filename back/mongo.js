@@ -1,20 +1,23 @@
+// Database
 const mongoose = require("mongoose"); // Le module mongoose est utilisé pour gérer les interactions avec la base de données. 
-const uniqueValidator = require('mongoose-unique-validator');
-const USER = process.env.USER_DB;
-const PASSWORD = process.env.PASSWORD_DB;
-const DATABASE = process.env.NAME_DATABASE;
-const uri = `mongodb+srv://${USER}:${PASSWORD}@${DATABASE}.c9uoz9q.mongodb.net/?retryWrites=true&w=majority` // la variable uri contient l'URL de connexion de la base de données.
+const uniqueValidator = require("mongoose-unique-validator")
 
-mongoose.connect(uri)
-	    .then(() => console.log('connected to Mongo'))
-        .catch(error => console.error({error}));
-// Définit un schéma de modèle utilisateur qui spécifie la structure de la collection d'utilisateurs dans la base de données.
+const password = process.env.DB_PASSWORD
+const username = process.env.DB_USER
+const db = process.env.DB_NAME
+const uri = `mongodb+srv://${username}:${password}@${db}.c1ssuzp.mongodb.net/?retryWrites=true&w=majority`
+
+mongoose
+    .connect(uri)
+    .then(() => console.log("Connected to Mongo!"))
+    .catch((err) => console.error("Error connecting to Mongo: ", err))
+
 const userSchema = new mongoose.Schema({
-    email: {type: String, required: true, unique: true },
-    password: {type: String, required: true}
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true }
 })
 userSchema.plugin(uniqueValidator)
 
 const User = mongoose.model("User", userSchema)
 
-module.exports = {mongoose, User}
+module.exports = { mongoose, User }
