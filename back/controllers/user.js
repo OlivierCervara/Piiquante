@@ -18,9 +18,21 @@ function hashPassword(password) {
     return bcrypt.hash(password, saltRounds)
 }
 
-function logUser(req, res) {
+async function logUser(req, res) {
     const email = req.body.email
     const password = req.body.password
+    const user = await User.findOne({email: email})
+
+    const isPasswordOK = await bcrypt.compare(password, user.password)
+    if (!isPasswordOK) {
+        res.status(403).send({ message: "Mot de passe incorrect" })
+    }
+    if (isPasswordOK) {
+        res.status(200).send({ message: "Connexion reussie" })
+    }
+    
+    console.log("user: ", user)
+    console.log("isPasswordOK: ", isPasswordOK)
 }
 
 module.exports = { createUser, logUser }
