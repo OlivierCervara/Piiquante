@@ -18,4 +18,9 @@ function hashPassword(password) {
     return bcrypt.hash(password, saltRounds)
 }
 
-module.exports = { createUser }
+function logUser(req, res) {
+    const email = req.body.email
+    const password = req.body.password
+}
+
+module.exports = { createUser, logUser }
