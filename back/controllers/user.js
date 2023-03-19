@@ -1,11 +1,10 @@
 const { User } = require("../mongo")
 const bcrypt = require("bcrypt")
+const jwt = require("jsonwebtoken")
 
 async function createUser(req, res) {
     const { email, password } = req.body
-
     const hashedPassword = await hashPassword(password)
-
     const user = new User({ email, password: hashedPassword })
     
     user.save()
@@ -19,20 +18,26 @@ function hashPassword(password) {
 }
 
 async function logUser(req, res) {
-    const email = req.body.email
-    const password = req.body.password
-    const user = await User.findOne({email: email})
+    try {    
+        const email = req.body.email
+        const password = req.body.password
+        const user = await User.findOne({email: email})
+        console.log("user: ", user)
 
-    const isPasswordOK = await bcrypt.compare(password, user.password)
-    if (!isPasswordOK) {
-        res.status(403).send({ message: "Mot de passe incorrect" })
-    }
-    if (isPasswordOK) {
-        res.status(200).send({ message: "Connexion reussie" })
-    }
-    
-    console.log("user: ", user)
-    console.log("isPasswordOK: ", isPasswordOK)
+        const isPasswordOK = await bcrypt.compare(password, user.password)
+        if (!isPasswordOK) {
+            res.status(403).send({ message: "Mot de passe incorrect" })
+        }
+        const token = createToken(email)
+        res.status(200).send({ userId: user?._id, token: token })
+    } catch (err) {
+        console.error(err)
+        res.status(500).send({ message: "Erreur interne"})
+    }}
+
+function createToken(email) {
+    const jwtPassword = process.env.JWT_PASSWORD
+    return jwt.sign({email: email}, jwtPassword, {expiresIn: "24h"})
 }
 
 module.exports = { createUser, logUser }
