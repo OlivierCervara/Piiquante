@@ -9,16 +9,18 @@ require("./mongo")
 
 // Controllers
 const { createUser, logUser } = require("./controllers/user")
-const { getSauces } = require("./controllers/sauces")
+const { getSauces, createSauce } = require("./controllers/sauces")
 
 // Middlewares
 app.use(cors())
 app.use(express.json())
+const {authenticateUser} = require("./middleware/auth")
 
 // Routes
 app.post("/api/auth/signup", createUser)
 app.post("/api/auth/login", logUser)
-app.get("/api/sauces", getSauces)
+app.get("/api/sauces", authenticateUser, getSauces)
+app.post("/api/sauces", authenticateUser, createSauce)
 
 // Listen
 app.listen(port, () => console.log("Listening on port " + port))
