@@ -1,4 +1,5 @@
 const mongoose = require("mongoose")
+
 const productSchema = new mongoose.Schema({
     userId: String,
     name: String,
@@ -22,6 +23,9 @@ function getSauces(req, res) {
 }
 
 function createSauce(req, res) {
+    const name = req.body.name
+    const manufacturer = req.body.manufacturer
+    console.log({name, manufacturer})
     const product = new Product({
         userId: "pouet",
         name: "pouet",
