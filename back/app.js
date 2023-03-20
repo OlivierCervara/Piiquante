@@ -3,6 +3,7 @@ const express = require("express")
 const app = express()
 const cors = require("cors")
 const bodyParser = require("body-parser")
+const path = require("path")
 const port = 3000
 
 // Connection to Database
@@ -15,8 +16,10 @@ const { getSauces, createSauce } = require("./controllers/sauces")
 // Middlewares
 app.use(cors())
 app.use(express.json())
-app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
+app.use(bodyParser.json())
+app.use("/images", express.static(path.join(__dirname, "images"))) // Attention au chemin
+
 
 const {authenticateUser} = require("./middleware/auth")
 const multer = require("multer")
