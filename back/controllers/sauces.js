@@ -23,9 +23,16 @@ function getSauces(req, res) {
 }
 
 function createSauce(req, res) {
-    const name = req.body.name
-    const manufacturer = req.body.manufacturer
-    console.log({name, manufacturer})
+    const sauce = JSON.parse(req.body.sauce)
+
+    const {name, manufacturer, description, mainPepper, heat, userId} = sauce
+    console.log("sauce: ", sauce)
+
+    console.log({ body: req.body })
+    console.log({ file: req.file })
+    const imagePath = req.file.destination + req.file.filename
+    console.log("imagePath: ", imagePath)
+
     const product = new Product({
         userId: "pouet",
         name: "pouet",
