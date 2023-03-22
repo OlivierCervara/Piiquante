@@ -4,6 +4,7 @@ const app = express()
 const cors = require("cors")
 const port = 3000
 const multer = require("multer")
+const path = require("path")
 
 const storage = multer.diskStorage({
     destination: "images/",
@@ -41,7 +42,7 @@ app.get("/api/sauces", authenticateUser, getSauces)
 app.post("/api/sauces", authenticateUser, upload.single("image"), createSauce)
 
 // Listen
-app.use("/images", express.static("images"))
+app.use("/images", express.static(path.join(__dirname, "images")))
 app.listen(port, () => console.log("Listening on port " + port))
 
 

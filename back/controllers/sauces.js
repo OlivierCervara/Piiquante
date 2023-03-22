@@ -21,20 +21,24 @@ function getSauces(req, res) {
     Product.find({}).then(products => res.send(products)) 
 }
 
+function makeImageUrl(req, fileName) {
+    return req.protocol + "://" + req.get("host") + "/images/" + fileName
+}
+
 function createSauce(req, res) {
     const { body, file } = req
     console.log({ file })
-    const { fileName } = file.fileName
+    const { fileName } = file
     const sauce = JSON.parse(body.sauce)
     const { name, manufacturer, description, mainPepper, heat, userId } = sauce
-    
+
     const product = new Product({
         userId: userId,
         name: name,
         manufacturer: manufacturer,
         description: description,
         mainPepper: mainPepper,
-        imageUrl: "images/" + fileName,
+        imageUrl: makeImageUrl(req, fileName),
         heat: heat,
         likes: 0,
         dislikes: 0,
