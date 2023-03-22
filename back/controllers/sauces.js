@@ -16,14 +16,15 @@ const productSchema = new mongoose.Schema({
 const Product = mongoose.model("Product", productSchema)
 
 function getSauces(req, res) {
-    //console.log("le token a ete valider, nous sommes dans get")
-    authenticateUser(req, res)
+    console.log("le token a ete valider, nous sommes dans get")
     //console.log("le token a l'air bon", decoded)
     Product.find({}).then(products => res.send(products)) 
 }
 
 function createSauce(req, res) {
     const { body, file } = req
+    console.log({ file })
+    const { fileName } = file.fileName
     const sauce = JSON.parse(body.sauce)
     const { name, manufacturer, description, mainPepper, heat, userId } = sauce
     
@@ -33,7 +34,7 @@ function createSauce(req, res) {
         manufacturer: manufacturer,
         description: description,
         mainPepper: mainPepper,
-        //imageUrl: imageUrl,
+        imageUrl: "images/" + fileName,
         heat: heat,
         likes: 0,
         dislikes: 0,
