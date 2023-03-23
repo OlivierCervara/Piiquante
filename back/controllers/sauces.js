@@ -16,9 +16,23 @@ const productSchema = new mongoose.Schema({
 const Product = mongoose.model("Product", productSchema)
 
 function getSauces(req, res) {
-    console.log("le token a ete valider, nous sommes dans get")
-    //console.log("le token a l'air bon", decoded)
-    Product.find({}).then(products => res.send(products)) 
+    Product.find({})
+            .then(products => res.send(products))
+            .catch(error => res.status(500).send(error))
+}
+
+function getSaucesById(req, res) {
+    const {id} = req.params
+    Product.findById(id)
+        .then(product => res.send(product))
+        .catch(console.error)
+}
+
+function deleteSauce(req, res) {
+    const {id} = req.params
+    Product.findByIdAndDelete(id)
+            .then((product) => res.send({ message: product}))
+            .catch(err => res.status(500).send({message: err}))
 }
 
 function makeImageUrl(req, fileName) {
@@ -46,8 +60,11 @@ function createSauce(req, res) {
         usersDisliked: []
     })
     product.save()
-            .then((res)=> console.log("produit save", res))
+            .then((message)=> {
+                res.status(201).send({ message: message })
+                return console.log("produit save", message)
+            })
             .catch(console.error)
 }
 
-module.exports = { getSauces, createSauce }
+module.exports = { getSauces, createSauce, getSaucesById, deleteSauce }
