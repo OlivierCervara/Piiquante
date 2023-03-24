@@ -1,5 +1,5 @@
 const mongoose = require("mongoose")
-const {unlink} = require("fs")
+const unlink = require("fs").promises.unlink
 
 const productSchema = new mongoose.Schema({
     userId: String,
@@ -31,19 +31,20 @@ function getSaucesById(req, res) {
 
 function deleteSauce(req, res) {
     const {id} = req.params
+
+    // 1. L'ordre de suppression du produit est envoye a Mongo
     Product.findByIdAndDelete(id)
+    // 2. Supprimer l'image localement
             .then(deleteImage)
+    // 3. Envoyer un message de succes au site web (client)
             .then(product => res.send({ message: product}))
             .catch(err => res.status(500).send({message: err}))
 }
 
 function deleteImage(product) {
-    const imageUrl = product.imageUrl
+    const {imageUrl} = product
     const fileToDelete = imageUrl.split("/").at(-1)
-    unlink(`images/${fileToDelete}`, (err) => {
-        console.error("Probleme a la suppression de l'image", err)
-    })
-    return product
+    return unlink(`images/${fileToDelete}`).then(() => product)
 }
 
 function makeImageUrl(req, fileName) {
