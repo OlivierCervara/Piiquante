@@ -1,5 +1,5 @@
 const mongoose = require("mongoose")
-const unlink = require("fs").promises.unlink
+const { unlink } = require("fs/promises")
 
 const productSchema = new mongoose.Schema({
     userId: String,
@@ -32,19 +32,54 @@ function getSaucesById(req, res) {
 function deleteSauce(req, res) {
     const {id} = req.params
 
-    // 1. L'ordre de suppression du produit est envoye a Mongo
     Product.findByIdAndDelete(id)
-    // 2. Supprimer l'image localement
-            .then(deleteImage)
-    // 3. Envoyer un message de succes au site web (client)
-            .then(product => res.send({ message: product}))
+            .then((product) => sendClientResponse(product, res))
+            .then((item) => deleteImage(item))
+            .then((res) => console.log("File deleted", res))
             .catch(err => res.status(500).send({message: err}))
 }
 
+function modifySauce(req, res) {
+    const {
+        params: {id}
+    } = req
+    
+    const hasNewImage = req.file != null
+    const payload = makePayload(hasNewImage, req)
+
+    Product.findByIdAndUpdate(id, payload)
+        .then((dbResponse) => sendClientResponse(dbResponse, res))
+        .then((product) => deleteImage(product))
+        .then((res) => console.log("File deleted", res))
+        .catch((err) => console.error("Problem updating", err))
+}
+
 function deleteImage(product) {
-    const {imageUrl} = product
-    const fileToDelete = imageUrl.split("/").at(-1)
-    return unlink(`images/${fileToDelete}`).then(() => product)
+    if (product == null) return
+    console.log("DELETE IMAGE", product)
+    const imageToDelete = product.imageUrl.split("/").at(-1)
+    return unlink("images/" + imageToDelete)
+}
+
+function makePayload(hasNewImage, req) {
+    console.log("hasNewImage: ", hasNewImage)
+    if (!hasNewImage) return req.body
+    const payload = JSON.parse(req.body.sauce)
+    payload.imageUrl = makeImageUrl(req, req.file.fileName)
+    console.log("Nouvelle image a gerer")
+    console.log("voici le payload: ", payload)
+    return payload
+}
+
+function sendClientResponse(product, res) {
+    if (product == null) {
+        console.log("NOTHING TO UPDATE")
+        return res.status(404).send({ message: "Object not founc in database"})
+    } 
+    console.log("ALL GOOD, UPDATING: ", product)
+    return Promise.resolve(res.status(200).send({ message: "Successfully updated" })).then(
+        () => product
+    )
 }
 
 function makeImageUrl(req, fileName) {
@@ -79,4 +114,4 @@ function createSauce(req, res) {
             .catch(console.error)
 }
 
-module.exports = { getSauces, createSauce, getSaucesById, deleteSauce }
+module.exports = { getSauces, createSauce, getSaucesById, deleteSauce, modifySauce }

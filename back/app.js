@@ -7,7 +7,7 @@ require("./mongo")
 
 // Controllers
 const { createUser, logUser } = require("./controllers/user")
-const { getSauces, createSauce, getSaucesById, deleteSauce } = require("./controllers/sauces")
+const { getSauces, createSauce, getSaucesById, deleteSauce, modifySauce } = require("./controllers/sauces")
 
 // Middlewares
 const { upload } = require("./middleware/multer")
@@ -16,10 +16,12 @@ const { authenticateUser } = require("./middleware/auth")
 // Routes
 app.post("/api/auth/signup", createUser)
 app.post("/api/auth/login", logUser)
+
 app.get("/api/sauces", authenticateUser, getSauces)
 app.post("/api/sauces", authenticateUser, upload.single("image"), createSauce)
 app.get("/api/sauces/:id", authenticateUser, getSaucesById)
 app.delete("/api/sauces/:id", authenticateUser, deleteSauce)
+app.put("/api/sauces/:id", authenticateUser, upload.single("image"), modifySauce)
 
 // Listen
 app.use("/images", express.static(path.join(__dirname, "images")))
