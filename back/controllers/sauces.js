@@ -124,13 +124,14 @@ function likeSauce(req, res) {
 
     getSauce(req, res)
         .then((product) => updateVote(product, like, userId))
+        .then(prod => sendClientResponse(prod, res))
         .catch((err) => res.status(500).send(err))
 }
 
 function updateVote(product, like, userId) {
-    if (like ===1 ) incrementLike(product, userId, like)
-    if (like === -1) incrementLike(product, userId)
+    if (like === 1 || like === -1) incrementLike(product, userId, like)
     //if (like === 0) resetVote(product, userId)
+    return product.save()
 }
 
 function incrementLike(product, userId, like) {
@@ -139,17 +140,13 @@ function incrementLike(product, userId, like) {
     const votersArray = like ===1 ? usersLiked : usersDisliked
     if (votersArray.includes(userId)) return
     votersArray.push(userId)
-    console.log("product apres vote: ", product)
+
+    let voteToUpdate = like === 1 ? product.likes : product.dislikes
+
+    voteToUpdate++
+
     //product.likes++
     //console.log("Product after like: ", product)
-}
-
-function decrementLike(product, userId) {
-    const {usersDisliked} = product
-    if (usersDisliked.includes(userId)) return
-    usersDisliked.push(userId)
-    product.dislikes++
-    console.log("Product after dislike: ", product)
 }
 
 module.exports = { getSauces, createSauce, getSaucesById, deleteSauce, modifySauce, likeSauce }
