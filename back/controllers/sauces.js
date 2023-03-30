@@ -16,40 +16,23 @@ const productSchema = new mongoose.Schema({
 })
 const Product = mongoose.model("Product", productSchema)
 
-/**
- * Récupère toutes les sauces de la base de données.
- *
- * @param {Object} req - L'objet de requête HTTP pour la requête en cours.
- * @param {Object} res - L'objet de réponse HTTP pour la requête en cours.
- * @returns {Promise} - Une promesse résolue avec un tableau de sauces ou rejetée avec une erreur en cas d'échec de la récupération des sauces.
- */
 function getSauces(req, res) {
     Product.find({})
             .then(products => res.send(products))
             .catch(error => res.status(500).send(error))
 }
 
-/**
- * Récupère une sauce à partir de son identifiant dans la base de données.
- *
- * @param {Object} req - L'objet de requête HTTP pour la requête en cours.
- * @param {Object} res - L'objet de réponse HTTP pour la requête en cours.
- * @returns {Promise} - Une promesse résolue avec la sauce trouvée ou rejetée avec une erreur en cas d'échec de la récupération de la sauce.
- */
-function getSaucesById(req, res) {
+function getSauce(req, res) {
     const {id} = req.params
-    Product.findById(id)
-        .then(product => res.send(product))
-        .catch(console.error)
+    return Product.findById(id)
 }
 
-/**
- * Supprime une sauce de la base de données et l'image associée du serveur.
- *
- * @param {Object} req - L'objet de requête HTTP pour la requête en cours.
- * @param {Object} res - L'objet de réponse HTTP pour la requête en cours.
- * @returns {Promise} - Une promesse résolue avec l'objet de sauce supprimée ou rejetée avec une erreur en cas d'échec de la suppression de la sauce.
- */
+function getSaucesById(req, res) {
+    getSauce(req, res)
+        .then(product => sendClientResponse(product, res))
+        .catch((err) => res.status(500).send(err))
+}
+
 function deleteSauce(req, res) {
     const {id} = req.params
 
@@ -60,13 +43,6 @@ function deleteSauce(req, res) {
             .catch(err => res.status(500).send({message: err}))
 }
 
-/**
- * Modifie une sauce existante dans la base de données, en remplaçant les propriétés modifiées et en supprimant l'image associée du serveur si une nouvelle image est fournie.
- *
- * @param {Object} req - L'objet de requête HTTP pour la requête en cours.
- * @param {Object} res - L'objet de réponse HTTP pour la requête en cours.
- * @returns {Promise} - Une promesse résolue avec l'objet de sauce modifiée ou rejetée avec une erreur en cas d'échec de la modification de la sauce.
- */
 function modifySauce(req, res) {
     const {
         params: {id}
@@ -82,12 +58,6 @@ function modifySauce(req, res) {
         .catch((err) => console.error("Problem updating", err))
 }
 
-/**
- * Supprime l'image associée à une sauce en utilisant son URL et en la supprimant du serveur.
- *
- * @param {Object} product - L'objet de sauce contenant l'URL de l'image à supprimer.
- * @returns {Promise} - Une promesse résolue avec le résultat de la suppression du fichier ou rejetée avec une erreur en cas d'échec de la suppression.
- */
 function deleteImage(product) {
     if (product == null) return
     console.log("DELETE IMAGE", product)
@@ -95,13 +65,6 @@ function deleteImage(product) {
     return unlink("images/" + imageToDelete)
 }
 
-/**
- * Génère un objet à partir des données envoyées par la requête, avec l'option de mettre à jour l'image
- * 
- * @param {Boolean} hasNewImage - Indique s'il y a une nouvelle image à gérer
- * @param {Object} req - L'objet requête de Express.js
- * @returns {Object} - L'objet contenant les propriétés mises à jour, y compris l'URL de l'image s'il y en a une
- */
 function makePayload(hasNewImage, req) {
     console.log("hasNewImage: ", hasNewImage)
     if (!hasNewImage) return req.body
@@ -118,7 +81,7 @@ function sendClientResponse(product, res) {
         return res.status(404).send({ message: "Object not founc in database"})
     } 
     console.log("ALL GOOD, UPDATING: ", product)
-    return Promise.resolve(res.status(200).send({ message: "Successfully updated" })).then(
+    return Promise.resolve(res.status(200).send(product)).then(
         () => product
     )
 }
@@ -148,11 +111,45 @@ function createSauce(req, res) {
         usersDisliked: []
     })
     product.save()
-            .then((message)=> {
-                res.status(201).send({ message: message })
-                return console.log("produit save", message)
-            })
-            .catch(console.error)
+            .then((message) => res.status(201).send({ message }))
+            .catch((err) => res.status(500).send(err))
 }
 
-module.exports = { getSauces, createSauce, getSaucesById, deleteSauce, modifySauce }
+function likeSauce(req, res) {
+    const { like, userId } = req.body
+    //console.log("Fonction like sauce invoquee", {like})
+    if (![0, -1, 1].includes(like)) return res.status(400).send({ message: "bad request"})
+    //console.log("Ce message n'apparaitra que si like vaut 0, -1 ou 1")
+    //console.log("like, userId: ", like,userId)
+
+    getSauce(req, res)
+        .then((product) => updateVote(product, like, userId))
+        .catch((err) => res.status(500).send(err))
+}
+
+function updateVote(product, like, userId) {
+    if (like ===1 ) incrementLike(product, userId, like)
+    if (like === -1) incrementLike(product, userId)
+    //if (like === 0) resetVote(product, userId)
+}
+
+function incrementLike(product, userId, like) {
+    const { usersLiked, usersDisliked } = product
+
+    const votersArray = like ===1 ? usersLiked : usersDisliked
+    if (votersArray.includes(userId)) return
+    votersArray.push(userId)
+    console.log("product apres vote: ", product)
+    //product.likes++
+    //console.log("Product after like: ", product)
+}
+
+function decrementLike(product, userId) {
+    const {usersDisliked} = product
+    if (usersDisliked.includes(userId)) return
+    usersDisliked.push(userId)
+    product.dislikes++
+    console.log("Product after dislike: ", product)
+}
+
+module.exports = { getSauces, createSauce, getSaucesById, deleteSauce, modifySauce, likeSauce }
