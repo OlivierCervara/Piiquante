@@ -123,30 +123,49 @@ function likeSauce(req, res) {
     //console.log("like, userId: ", like,userId)
 
     getSauce(req, res)
-        .then((product) => updateVote(product, like, userId))
+        .then((product) => updateVote(product, like, userId, res))
+        .then(pr => pr.save())
         .then(prod => sendClientResponse(prod, res))
         .catch((err) => res.status(500).send(err))
 }
 
-function updateVote(product, like, userId) {
-    if (like === 1 || like === -1) incrementLike(product, userId, like)
-    //if (like === 0) resetVote(product, userId)
-    return product.save()
+function updateVote(product, like, userId, res) {
+    if (like === 1 || like === -1) return incrementVote(product, userId, like)
+    return resetVote(product, userId, res)
 }
 
-function incrementLike(product, userId, like) {
+function resetVote(product,userId,res) {
+    const { usersLiked, usersDisliked } = product
+    if ([usersLiked, usersDisliked].every(arr => arr.includes(userId))) 
+        return Promise.reject("User seems to have voted both ways")
+
+    if (![usersLiked, usersDisliked].some(arr => arr.includes(userId))) 
+        return Promise.reject("User seems to have not voted")
+
+    if (usersLiked.includes(userId)) {
+        --product.likes
+        product.usersLiked = product.usersLiked.filter(id => id !== userId)
+    } else {
+        --product.dislikes
+        product.usersDisliked = product.usersDisliked.filter(id => id !== userId)
+    }
+
+    return product
+}
+
+function incrementVote(product, userId, like) {
     const { usersLiked, usersDisliked } = product
 
     const votersArray = like ===1 ? usersLiked : usersDisliked
-    if (votersArray.includes(userId)) return
+    if (votersArray.includes(userId)) return product
     votersArray.push(userId)
 
-    let voteToUpdate = like === 1 ? product.likes : product.dislikes
-
-    voteToUpdate++
-
-    //product.likes++
-    //console.log("Product after like: ", product)
+    if (like === 1) {
+        ++product.likes
+    } else {
+        ++product.dislikes 
+    }
+    return product
 }
 
 module.exports = { getSauces, createSauce, getSaucesById, deleteSauce, modifySauce, likeSauce }
