@@ -48,8 +48,13 @@ function modifySauce(req, res) {
         params: {id}
     } = req
 
-    const userId = req.userId // Récupérer l'id de l'utilisateur actuel
+    //const { userId } = req.body; // Récupérer la valeur de userId dans le corps de la requête
+    //if (!userId) {
+    //return res.status(400).send({ message: 'Missing userId' });
+    //}
 
+    //const userId = req.userId // Récupérer l'id de l'utilisateur actuel
+    const { userId } = req.body; 
     Product.findById(id) // Récupérer la sauce
         .then(sauce => {
             if (sauce.userId !== userId) { // Vérifier l'autorisation
