@@ -12,5 +12,3 @@ saucesRouter.put("/:id", authenticateUser, upload.single("image"), modifySauce) 
 saucesRouter.post("/:id/like", authenticateUser, likeSauce)
 
 module.exports = { saucesRouter }
-
-

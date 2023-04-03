@@ -48,7 +48,7 @@ async function logUser(req, res) {
 
         const isPasswordOK = await bcrypt.compare(password, user.password)
         if (!isPasswordOK) {
-            res.status(403).send({ message: "Mot de passe incorrect" })
+            res.status(403).send({ message: "Paire identifiant/mot de passe incorrecte" })
         }
         const token = createToken(email)
         res.status(200).send({ userId: user?._id, token: token })

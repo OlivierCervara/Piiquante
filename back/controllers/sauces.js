@@ -47,15 +47,25 @@ function modifySauce(req, res) {
     const {
         params: {id}
     } = req
-    
-    const hasNewImage = req.file != null
-    const payload = makePayload(hasNewImage, req)
 
-    Product.findByIdAndUpdate(id, payload)
-        .then((dbResponse) => sendClientResponse(dbResponse, res))
-        .then((product) => deleteImage(product))
-        .then((res) => console.log("File deleted", res))
-        .catch((err) => console.error("Problem updating", err))
+    const userId = req.userId // Récupérer l'id de l'utilisateur actuel
+
+    Product.findById(id) // Récupérer la sauce
+        .then(sauce => {
+            if (sauce.userId !== userId) { // Vérifier l'autorisation
+                return res.status(403).send({ message: 'Unauthorized request' })
+            }
+            
+            const hasNewImage = req.file != null
+            const payload = makePayload(hasNewImage, req)
+        
+            Product.findByIdAndUpdate(id, payload)
+                .then((dbResponse) => sendClientResponse(dbResponse, res))
+                .then((product) => deleteImage(product))
+                .then((res) => console.log("File deleted", res))
+                .catch((err) => console.error("Problem updating", err))
+        })
+        .catch(err => res.status(500).send({message: err}))
 }
 
 function deleteImage(product) {
