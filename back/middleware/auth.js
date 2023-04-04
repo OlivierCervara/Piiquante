@@ -1,12 +1,5 @@
 const jwt = require("jsonwebtoken") //pour créer et vérifier des jetons d'authentification.
 
-/**
- * 
- * @param {object} req - L'objet requête contenant des informations sur la requête HTTP.
- * @param {object} res - L'objet réponse contenant des informations sur la réponse HTTP.
- * @param {function} next - La fonction à appeler si l'utilisateur est authentifié.
- * @returns {void}
- */
 function authenticateUser(req, res, next) {
     console.log(authenticateUser)
     const header = req.header("Authorization") // Récupère la valeur de l'en-tête Authorization à partir de la requête HTTP.

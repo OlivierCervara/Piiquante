@@ -8,7 +8,7 @@ const productSchema = new mongoose.Schema({
     description: String,
     mainPepper: String,
     imageUrl: String,
-    heat: Number, 
+    heat: Number,
     likes: Number,
     dislikes: Number,
     usersLiked: [String],
@@ -27,7 +27,7 @@ function getSauce(req, res) {
     return Product.findById(id)
 }
 
-function getSaucesById(req, res) {
+function getSauceById(req, res) {
     getSauce(req, res)
         .then(product => sendClientResponse(product, res))
         .catch((err) => res.status(500).send(err))
@@ -35,7 +35,6 @@ function getSaucesById(req, res) {
 
 function deleteSauce(req, res) {
     const {id} = req.params
-
     Product.findByIdAndDelete(id)
             .then((product) => sendClientResponse(product, res))
             .then((item) => deleteImage(item))
@@ -47,30 +46,15 @@ function modifySauce(req, res) {
     const {
         params: {id}
     } = req
+    
+    const hasNewImage = req.file != null
+    const payload = makePayload(hasNewImage, req)
 
-    //const { userId } = req.body; // Récupérer la valeur de userId dans le corps de la requête
-    //if (!userId) {
-    //return res.status(400).send({ message: 'Missing userId' });
-    //}
-
-    //const userId = req.userId // Récupérer l'id de l'utilisateur actuel
-    const { userId } = req.body; 
-    Product.findById(id) // Récupérer la sauce
-        .then(sauce => {
-            if (sauce.userId !== userId) { // Vérifier l'autorisation
-                return res.status(403).send({ message: 'Unauthorized request' })
-            }
-            
-            const hasNewImage = req.file != null
-            const payload = makePayload(hasNewImage, req)
-        
-            Product.findByIdAndUpdate(id, payload)
-                .then((dbResponse) => sendClientResponse(dbResponse, res))
-                .then((product) => deleteImage(product))
-                .then((res) => console.log("File deleted", res))
-                .catch((err) => console.error("Problem updating", err))
-        })
-        .catch(err => res.status(500).send({message: err}))
+    Product.findByIdAndUpdate(id, payload)
+        .then((dbResponse) => sendClientResponse(dbResponse, res))
+        .then((product) => deleteImage(product))
+        .then((res) => console.log("File deleted", res))
+        .catch((err) => console.error("Problem updating", err))
 }
 
 function deleteImage(product) {
@@ -125,9 +109,10 @@ function createSauce(req, res) {
         usersLiked: [],
         usersDisliked: []
     })
-    product.save()
-            .then((message) => res.status(201).send({ message }))
-            .catch((err) => res.status(500).send(err))
+    product
+        .save()
+        .then((message) => res.status(201).send({ message }))
+        .catch((err) => res.status(500).send(err))
 }
 
 function likeSauce(req, res) {
@@ -183,4 +168,4 @@ function incrementVote(product, userId, like) {
     return product
 }
 
-module.exports = { getSauces, createSauce, getSaucesById, deleteSauce, modifySauce, likeSauce }
+module.exports = { getSauces, createSauce, getSauceById, deleteSauce, modifySauce, likeSauce }
