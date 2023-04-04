@@ -36,9 +36,11 @@ function getSauceById(req, res) {
 function deleteSauce(req, res) {
     const {id} = req.params
     Product.findByIdAndDelete(id)
-            .then((product) => sendClientResponse(product, res))
-            .then((item) => deleteImage(item))
-            .then((res) => console.log("File deleted", res))
+            .then((product) => {
+                deleteImage(product)
+                console.log("File deleted", product.imageUrl)
+                res.status(200).json({ message: "Deleted!" })
+            })
             .catch(err => res.status(500).send({message: err}))
 }
 
@@ -52,8 +54,12 @@ function modifySauce(req, res) {
 
     Product.findByIdAndUpdate(id, payload)
         .then((dbResponse) => sendClientResponse(dbResponse, res))
-        .then((product) => deleteImage(product))
-        .then((res) => console.log("File deleted", res))
+        .then((product) => {
+            if (hasNewImage) {
+                deleteImage(product)
+                console.log("File deleted", product.imageUrl)
+            }
+        })
         .catch((err) => console.error("Problem updating", err))
 }
 
