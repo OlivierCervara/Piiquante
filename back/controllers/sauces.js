@@ -29,7 +29,7 @@ function getSauce(req, res) {
 
 function getSauceById(req, res) {
   getSauce(req, res)
-    .then(product => sendClientResponse(product, res))
+    .then((product) => sendClientResponse(product, res))
     .catch((err) => res.status(500).send(err))
 }
 
@@ -39,8 +39,8 @@ function deleteSauce(req, res) {
   Product.findByIdAndDelete(id)
     .then((product) => sendClientResponse(product, res))
     .then((item) => deleteImage(item))
-    .then((res) => console.log("File deleted", res))
-    .catch(err => res.status(500).send({ message: err }))
+    .then((res) => console.log("FILE DELETED", res))
+    .catch((err) => res.status(500).send({ message: err }))
 }
 
 function modifySauce(req, res) {
@@ -125,15 +125,12 @@ function createSauce(req, res) {
 
 function likeSauce(req, res) {
   const { like, userId } = req.body
-  //console.log("Fonction like sauce invoquee", {like})
   if (![0, -1, 1].includes(like)) return res.status(400).send({ message: "bad request" })
-  //console.log("Ce message n'apparaitra que si like vaut 0, -1 ou 1")
-  //console.log("like, userId: ", like,userId)
 
   getSauce(req, res)
     .then((product) => updateVote(product, like, userId, res))
-    .then(pr => pr.save())
-    .then(prod => sendClientResponse(prod, res))
+    .then((pr) => pr.save())
+    .then((prod) => sendClientResponse(prod, res))
     .catch((err) => res.status(500).send(err))
 }
 
@@ -144,18 +141,18 @@ function updateVote(product, like, userId, res) {
 
 function resetVote(product, userId, res) {
   const { usersLiked, usersDisliked } = product
-  if ([usersLiked, usersDisliked].every(arr => arr.includes(userId)))
+  if ([usersLiked, usersDisliked].every((arr) => arr.includes(userId)))
     return Promise.reject("User seems to have voted both ways")
 
-  if (![usersLiked, usersDisliked].some(arr => arr.includes(userId)))
-    return Promise.reject("User seems to have not voted")
+  if (![usersLiked, usersDisliked].some((arr) => arr.includes(userId)))
+    return Promise.reject("User seems to not have voted")
 
   if (usersLiked.includes(userId)) {
     --product.likes
-    product.usersLiked = product.usersLiked.filter(id => id !== userId)
+    product.usersLiked = product.usersLiked.filter((id) => id !== userId)
   } else {
     --product.dislikes
-    product.usersDisliked = product.usersDisliked.filter(id => id !== userId)
+    product.usersDisliked = product.usersDisliked.filter((id) => id !== userId)
   }
 
   return product
@@ -168,11 +165,7 @@ function incrementVote(product, userId, like) {
   if (votersArray.includes(userId)) return product
   votersArray.push(userId)
 
-  if (like === 1) {
-    ++product.likes
-  } else {
-    ++product.dislikes
-  }
+  like === 1 ? ++product.likes : ++product.dislikes
   return product
 }
 

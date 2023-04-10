@@ -16,5 +16,3 @@ app.use("/api/auth", authRouter)
 // Listen
 app.use("/images", express.static(path.join(__dirname, "images"))) //pour servir les fichiers images statiques à partir d'un dossier nommé "images"
 app.listen(port, () => console.log("Listening on port " + port)) //lance le serveur sur le port spécifié
-
-
