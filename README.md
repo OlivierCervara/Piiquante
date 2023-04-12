@@ -42,14 +42,20 @@ Here are the dependancies you need to install:
 
 On Windows, these installations require to use PowerShell in administrator mode.
 
-Then, clone this repo, run `npm install`, and run `npm install --save-dev run-script-os`.
+Then, clone this repo, run `npm install`, and run `npm run start`.
+
+Don't forget to create .env file with these informations :
+DB_PASSWORD=gmVgZ4JCpL1zq1J9
+DB_USER=oliviercervara
+DB_NAME=cluster0
+JWT_PASSWORD=8a9e767e-9394-4992-b6de-1310ad8190d0
 
 
 ## Usage ##
 
 Run `npm start`. This should both run the local server and launch your browser.
 
-If your browser fails to launch, or shows a 404 error, navigate your browser to http://localhost:8080.
+If your browser fails to launch, or shows a 404 error, navigate your browser to http://localhost:84200/login.
 
 The app should reload automatically when you make a change to a file.
 
