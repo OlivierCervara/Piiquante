@@ -18,8 +18,8 @@ const Product = mongoose.model("Product", productSchema) // Definition d'un mod�
 
 function getSauces(req, res) { // Récupère tous les produits de la base de données et les renvoie au client.
   Product.find({})
-    .then(products => res.send(products))
-    .catch(error => res.status(500).send(error))
+    .then((products) => res.send(products))
+    .catch((error) => res.status(400).send(error))
 }
 
 function getSauce(req, res) { // Récupère un produit spécifique de la base de données à partir de son identifiant.
@@ -39,7 +39,6 @@ function deleteSauce(req, res) { // Supprime un produit de la base de données �
   Product.findByIdAndDelete(id)
     .then((product) => sendClientResponse(product, res))
     .then((item) => deleteImage(item))
-    .then((res) => console.log("FILE DELETED", res))
     .catch((err) => res.status(500).send({ message: err }))
 }
 
@@ -52,7 +51,7 @@ function modifySauce(req, res) { // Modifie un produit existant dans la base de 
   Product.findById(id) // Récupérer la sauce
     .then(sauce => {
       if (sauce.userId !== userId) { // Vérifier l'autorisation
-        return res.status(403).send({ message: 'Unauthorized request' })
+        return res.status(403).send({ message: 'Requete non authoriser' })
       }
 
       const hasNewImage = req.file != null
@@ -61,8 +60,7 @@ function modifySauce(req, res) { // Modifie un produit existant dans la base de 
       Product.findByIdAndUpdate(id, payload)
         .then((dbResponse) => sendClientResponse(dbResponse, res))
         .then((product) => deleteImage(product))
-        .then((res) => console.log("File deleted", res))
-        .catch((err) => console.error("Problem updating", err))
+        .catch((err) => console.error("Probleme d'update", err))
     })
 }
 
@@ -81,7 +79,7 @@ function makePayload(hasNewImage, req) { // Crée un objet de données à partir
 
 function sendClientResponse(product, res) { // Renvoie une réponse HTTP au client, contenant les données du produit. S'il n'y a pas de produit, la fonction renvoie une réponse d'erreur.
   if (product == null) {
-    return res.status(404).send({ message: "Object not founc in database" })
+    return res.status(404).send({ message: "Objet pas trouve dans la base de donnee" })
   }
   return Promise.resolve(res.status(200).send(product)).then(
     () => product
@@ -108,7 +106,7 @@ function createSauce(req, res) { //  Crée un nouveau produit dans la base de do
     heat: heat,
     likes: 0,
     dislikes: 0,
-    usersLiked: [],
+    usersLiked: [], 
     usersDisliked: []
   })
   product.save()
@@ -116,9 +114,10 @@ function createSauce(req, res) { //  Crée un nouveau produit dans la base de do
     .catch((err) => res.status(500).send(err))
 }
 
+
 function likeSauce(req, res) { // Met à jour le compteur de "likes" ou de "dislikes" d'un produit, en fonction des données fournies dans la requête HTTP. Si le "like" n'est pas égal à 1, 0 ou -1, la fonction renvoie une réponse d'erreur.
   const { like, userId } = req.body
-  if (![0, -1, 1].includes(like)) return res.status(400).send({ message: "bad request" })
+  if (![0, -1, 1].includes(like)) return res.status(400).send({ message: "mauvaise requete" })
 
   getSauce(req, res)
     .then((product) => updateVote(product, like, userId, res))
@@ -161,5 +160,4 @@ function incrementVote(product, userId, like) {
   like === 1 ? ++product.likes : ++product.dislikes // Sinon, elle ajoute l'identifiant de l'utilisateur au tableau correspondant, incrémente le nombre de votes positifs ou négatifs selon le cas, et renvoie l'objet product mis à jour.
   return product
 }
-
 module.exports = { getSauces, createSauce, getSauceById, deleteSauce, modifySauce, likeSauce }

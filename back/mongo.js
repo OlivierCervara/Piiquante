@@ -1,5 +1,6 @@
 // Database
 const mongoose = require("mongoose"); // Le module mongoose est utilisé pour gérer les interactions avec la base de données. 
+const uniqueValidator = require('mongoose-unique-validator')
 const password = process.env.DB_PASSWORD
 const username = process.env.DB_USER
 const db = process.env.DB_NAME
