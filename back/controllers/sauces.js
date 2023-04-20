@@ -47,7 +47,7 @@ function modifySauce(req, res) { // Modifie un produit existant dans la base de 
     params: { id }
   } = req
 
-  let userId = req.body.userId ? req.body.userId : JSON.parse(req.body.sauce).userId;
+  let userId = req.body.userId ? req.body.userId : JSON.parse(req.body.sauce).userId; // permet de définir la variable userId en utilisant la valeur de req.body.userId si elle est définie, sinon en extrayant la valeur de userId depuis un objet JSON stocké dans req.body.sauce.
   Product.findById(id) // Récupérer la sauce
     .then(sauce => {
       if (sauce.userId !== userId) { // Vérifier l'autorisation
