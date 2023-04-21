@@ -7,7 +7,7 @@ const bodyParser = require("body-parser") // pour faciliter l'analyse des donné
 
 saucesRouter.use(bodyParser.json()) // On utilise body-parser pour analyser les données des requêtes avec un format JSON.
 
-saucesRouter.get("/", authenticateUser, getSauces) // Cette route utilise l'authentification de l'utilisateur pour vérifier que l'utilisateur a le droit de voir les sauces.
+saucesRouter.get("/", authenticateUser, getSauces)  // Cette route utilise l'authentification de l'utilisateur pour vérifier que l'utilisateur a le droit de voir les sauces.
 saucesRouter.post("/", authenticateUser, upload.single("image"), createSauce) // Cette route utilise l'authentification de l'utilisateur pour s'assurer que seuls les utilisateurs authentifiés peuvent créer de nouvelles sauces. Elle utilise également le middleware d'upload de fichiers multer pour gérer les images.
 saucesRouter.get("/:id", authenticateUser, getSauceById) //  Cette route utilise l'authentification de l'utilisateur pour s'assurer que seuls les utilisateurs authentifiés peuvent accéder à cette ressource.
 saucesRouter.delete("/:id", authenticateUser, deleteSauce) // Cette route utilise l'authentification de l'utilisateur pour s'assurer que seuls les utilisateurs authentifiés peuvent supprimer cette ressource.

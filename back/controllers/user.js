@@ -1,4 +1,4 @@
-const { User } = require("../mongo") // Importe le modèle User de la base de données MongoDB.
+const {User} = require("../models/User") // Importe le modèle User de la base de données MongoDB.
 const bcrypt = require("bcrypt") // permet de chiffrer des mots de passe.
 const jwt = require("jsonwebtoken") // Importe la bibliothèque jsonwebtoken qui permet de générer et de vérifier des jetons d'authentification.
 

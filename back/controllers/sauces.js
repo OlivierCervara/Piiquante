@@ -1,20 +1,6 @@
 const mongoose = require("mongoose")
 const { unlink } = require("fs/promises") // Permet de supprimer des fichiers.
-
-const productSchema = new mongoose.Schema({ // Definition modèle de données pour une collection de produits dans la base de données
-  userId: String,
-  name: String,
-  manufacturer: String,
-  description: String,
-  mainPepper: String,
-  imageUrl: String,
-  heat: Number,
-  likes: Number,
-  dislikes: Number,
-  usersLiked: [String],
-  usersDisliked: [String]
-})
-const Product = mongoose.model("Product", productSchema) // Definition d'un modèle pour les produits, qui utilise le schéma défini précédemment
+const Product = require("../models/Sauce") // Definition d'un modèle pour les produits, qui utilise le schéma défini précédemment
 
 function getSauces(req, res) { // Récupère tous les produits de la base de données et les renvoie au client.
   Product.find({})
@@ -34,12 +20,12 @@ function getSauceById(req, res) { // Appelle "getSauce" pour récupérer un prod
 }
 
 function deleteSauce(req, res) { // Supprime un produit de la base de données à partir de son identifiant, supprime également l'image associée, puis renvoie une réponse au client.
-  const { id } = req.params
+  const { id } = req.params;
 
   Product.findByIdAndDelete(id)
-    .then((product) => sendClientResponse(product, res))
-    .then((item) => deleteImage(item))
-    .catch((err) => res.status(500).send({ message: err }))
+  .then((product) => sendClientResponse(product, res))
+  .then((item) => deleteImage(item))
+  .catch((err) => res.status(500).send({ message: err }))
 }
 
 function modifySauce(req, res) { // Modifie un produit existant dans la base de données, en vérifiant que l'utilisateur a l'autorisation de le faire, en mettant à jour les champs modifiés et en supprimant l'image d'origine.
@@ -47,7 +33,7 @@ function modifySauce(req, res) { // Modifie un produit existant dans la base de 
     params: { id }
   } = req
 
-  let userId = req.body.userId ? req.body.userId : JSON.parse(req.body.sauce).userId; // permet de définir la variable userId en utilisant la valeur de req.body.userId si elle est définie, sinon en extrayant la valeur de userId depuis un objet JSON stocké dans req.body.sauce.
+  let userId = req.body.userId ? req.body.userId : JSON.parse(req.body.sauce).userId; // permet de définir la variable userId en utilisant la valeur de req.body.userId si elle est définie, sinon en extrayant la valeur de userId depuis un objet JSON stocké dans req.body.sauce.// permet de définir la variable userId en utilisant la valeur de req.body.userId si elle est définie, sinon en extrayant la valeur de userId depuis un objet JSON stocké dans req.body.sauce.
   Product.findById(id) // Récupérer la sauce
     .then(sauce => {
       if (sauce.userId !== userId) { // Vérifier l'autorisation
@@ -131,12 +117,12 @@ function updateVote(product, like, userId, res) { // Vérifie si l'utilisateur a
   return resetVote(product, userId, res)
 }
 
-function resetVote(product, userId, res) { // Vérifie d'abord si l'utilisateur a voté pour le produit à la fois positivement et négativement en vérifiant si l'identifiant de l'utilisateur figure dans les tableaux usersLiked et usersDisliked de l'objet product. Si tel est le cas, la fonction renvoie une promesse rejetée avec le message 
+function resetVote(product, userId, res) { // Vérifie d'abord si l'utilisateur a voté pour le produit à la fois positivement et négativement en vérifiant si l'identifiant de l'utilisateur figure dans les tableaux usersLiked et usersDisliked de l'objet product. Si tel est le cas, la fonction renvoie une promesse rejetée avec le message
   const { usersLiked, usersDisliked } = product
   if ([usersLiked, usersDisliked].every((arr) => arr.includes(userId)))
     return Promise.reject("User seems to have voted both ways")
 
-  if (![usersLiked, usersDisliked].some((arr) => arr.includes(userId))) // vérifie ensuite si l'utilisateur a voté pour le produit en vérifiant si l'identifiant de l'utilisateur figure dans l'un des tableaux usersLiked et usersDisliked de l'objet product. Si ce n'est pas le cas, la fonction renvoie une promesse rejetée avec le message 
+  if (![usersLiked, usersDisliked].some((arr) => arr.includes(userId))) // vérifie ensuite si l'utilisateur a voté pour le produit en vérifiant si l'identifiant de l'utilisateur figure dans l'un des tableaux usersLiked et usersDisliked de l'objet product. Si ce n'est pas le cas, la fonction renvoie une promesse rejetée avec le message  
     return Promise.reject("User seems to not have voted")
 
   if (usersLiked.includes(userId)) { // si l'utilisateur a voté pour le produit, la fonction décrémente le nombre de votes positifs ou négatifs selon le cas, et supprime l'identifiant de l'utilisateur du tableau correspondant. La fonction renvoie ensuite l'objet product mis à jour.
